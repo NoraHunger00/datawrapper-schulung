@@ -1,36 +1,35 @@
 import requests
 import os
-from typing import List, Dict
-
+import time
+from typing import Dict
 
 # KONFIGURATION
 CONFIG = {
-    # Liste der zu ladenden Datensätze
-    # Format: {"dateiname": "URL"}
     "datasets": {
         "hundebiss-statistik-2024.csv": "https://www.berlin.de/sen/verbraucherschutz/aufgaben/hundehaltung/hundebiss-statistik/hundebiss-statistik-2024/2025-08-14-biss-statistik-2024.csv",
-        # Weitere Datensätze können hier hinzugefügt werden, z. B.:
-        # "bevoelkerung-2024.csv": "https://.../bevoelkerung-2024.csv",
     },
-    # Ausgabeordner für die CSVs
-    "output_dir":  os.path.expanduser("~/Documents/ODIS/Datawrapper Schulung/data"),
-    # Soll der Ordner erstellt werden, falls er nicht existiert?
+    "output_dir": "./data",
     "create_dir": True,
-    # Soll eine Bestätigungsmeldung ausgegeben werden?
     "verbose": True,
+    "delay_seconds": 5,  # 👈 Verzögerung zwischen den Requests
 }
 
 # HILFSFUNKTIONEN
-def download_file(url: str, output_path: str, verbose: bool = True) -> bool:
-    """Lädt eine Datei von einer URL herunter und speichert sie lokal."""
+def download_file(url: str, output_path: str, verbose: bool = True, delay: int = 5) -> bool:
+    """Lädt eine Datei mit Verzögerung und User-Agent herunter."""
     try:
-        response = requests.get(url, stream=True)
-        response.raise_for_status()  # HTTP-Fehler prüfen
+        if verbose:
+            print(f"📥 Lade {os.path.basename(output_path)} von {url}...")
 
-        # Verzeichnis erstellen, falls nicht vorhanden
+        time.sleep(delay)  # Verzögerung
+
+        headers = {
+            "User-Agent": "Mozilla/5.0 (compatible; GitHub Actions Bot/1.0)"
+        }
+        response = requests.get(url, stream=True, headers=headers)
+        response.raise_for_status()
+
         os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
-
-        # Datei speichern
         with open(output_path, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
@@ -48,17 +47,17 @@ def download_all_datasets(config: Dict) -> None:
     datasets = config["datasets"]
     create_dir = config.get("create_dir", True)
     verbose = config.get("verbose", True)
+    delay = config.get("delay_seconds", 5)
 
     if create_dir:
         os.makedirs(output_dir, exist_ok=True)
 
     for filename, url in datasets.items():
         output_path = os.path.join(output_dir, filename)
-        if verbose:
-            print(f"📥 Lade {filename} von {url}...")
-        download_file(url, output_path, verbose)
+        download_file(url, output_path, verbose, delay)
 
 # HAUPTPROGRAMM
 if __name__ == "__main__":
+    print("Starte Daten-Download...")
     download_all_datasets(CONFIG)
-    print("Datensätze wurden heruntergeladen. ")
+    print("Fertig!")
