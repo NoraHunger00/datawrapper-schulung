@@ -15,6 +15,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # 👇 Debug-Schritt: Zeige alle Dateien an
+      - name: Debug: Liste alle Dateien auf
+        run: |
+          echo "Aktuelles Verzeichnis:"
+          pwd
+          echo "Alle Dateien:"
+          ls -R
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -26,10 +34,10 @@ jobs:
       - name: Fetch data from Berlin.de
         env:
           OUTPUT_FILE: ${{ env.CSV_FILE }}
-        run: python ./fetch-data.py  # 👈 ./ hinzufügen
+        run: python fetch-data.py
 
       - name: Upload to Datawrapper
         env:
           DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
           CSV_FILE: ${{ env.CSV_FILE }}
-        run: python ./create_datawrapper_chart.py  # 👈 ./ hinzufügen
+        run: python create-datawrapper-chart.py
