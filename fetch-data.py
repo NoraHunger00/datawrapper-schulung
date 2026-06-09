@@ -1,64 +1,49 @@
 import requests
 import os
 import time
-from typing import Dict
+import hashlib
 
-CONFIG = {
-    "datasets": {
-        "hundebiss-statistik-2024.csv": "https://www.berlin.de/sen/verbraucherschutz/aufgaben/hundehaltung/hundebiss-statistik/hundebiss-statistik-2024/2025-08-14-biss-statistik-2024.csv",
-    },
-    "output_dir": "./data",
-    "create_dir": True,
-    "verbose": True,
-    "delay_seconds": 10,  # Längere Verzögerung
-    "max_retries": 3,     # Maximale Wiederholungen
-}
+# Konfiguration
+DATA_URL = "https://www.berlin.de/sen/verbraucherschutz/aufgaben/hundehaltung/hundebiss-statistik/hundebiss-statistik-2024/2025-08-14-biss-statistik-2024.csv"
+OUTPUT_FILE = os.getenv("OUTPUT_FILE", "./data/hundebiss-statistik-2024.csv")
 
-def download_file(url: str, output_path: str, verbose: bool = True, delay: int = 10, max_retries: int = 3) -> bool:
-    """Lädt eine Datei herunter und überschreibt sie immer."""
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; GitHub Actions Bot/1.0)"}
-    for attempt in range(max_retries):
-        try:
-            if verbose:
-                print(f"📥 Lade {os.path.basename(output_path)} von {url} (Versuch {attempt + 1}/{max_retries})...")
-            time.sleep(delay * (attempt + 1))
+# 1. Prüfen, ob sich die Datei geändert hat
+if os.path.exists(OUTPUT_FILE):
+    with open(OUTPUT_FILE, "rb") as f:
+        current_hash = hashlib.md5(f.read()).hexdigest()
+else:
+    current_hash = None
 
-            response = requests.get(url, stream=True, headers=headers)
-            if response.status_code == 429:
-                print(f"⚠️ 429 Too Many Requests. Warte {delay * (attempt + 2)} Sekunden...")
-                continue
-            response.raise_for_status()
+# 2. Daten herunterladen
+print(f"📥 Lade Daten von Berlin.de in {OUTPUT_FILE}...")
+headers = {"User-Agent": "Mozilla/5.0 (compatible; GitHub Actions Bot/1.0)"}
 
-            # 👇 Immer überschreiben (auch wenn die Datei existiert)
-            os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
-            with open(output_path, "wb") as f:  # "wb" überschreibt immer!
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
+for attempt in range(3):
+    try:
+        time.sleep(10 * (attempt + 1))
+        response = requests.get(DATA_URL, headers=headers)
+        if response.status_code == 429:
+            print(f"⚠️ 429 Too Many Requests (Versuch {attempt + 1}/3). Warte...")
+            continue
+        response.raise_for_status()
 
-            if verbose:
-                print(f"✅ Erfolgreich heruntergeladen und Überschrieben: {output_path}")
-            return True
-        except Exception as e:
-            print(f"❌ Fehler beim Herunterladen von {url} (Versuch {attempt + 1}): {e}")
-            if attempt == max_retries - 1:
-                return False
+        new_content = response.content
+        new_hash = hashlib.md5(new_content).hexdigest()
 
-def download_all_datasets(config: Dict) -> None:
-    output_dir = config["output_dir"]
-    datasets = config["datasets"]
-    create_dir = config.get("create_dir", True)
-    verbose = config.get("verbose", True)
-    delay = config.get("delay_seconds", 10)
-    max_retries = config.get("max_retries", 3)
+        # 3. Nur speichern, wenn sich die Daten geändert haben
+        if current_hash and new_hash == current_hash:
+            print("ℹ️ Daten haben sich nicht geändert. Überspringe Speichern und Upload.")
+            exit(0)  # Beende das Skript, wenn keine Änderungen vorliegen
 
-    if create_dir:
-        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
+        with open(OUTPUT_FILE, "wb") as f:
+            f.write(new_content)
+        print(f"✅ Daten erfolgreich gespeichert: {OUTPUT_FILE}")
+        break
+    except Exception as e:
+        print(f"❌ Fehler beim Herunterladen (Versuch {attempt + 1}/3): {e}")
+        if attempt == 2:
+            print("❌ Maximale Versuche erreicht. Abbruch.")
+            exit(1)
 
-    for filename, url in datasets.items():
-        output_path = os.path.join(output_dir, filename)
-        download_file(url, output_path, verbose, delay, max_retries)
-
-if __name__ == "__main__":
-    print(" Starte Daten-Download...")
-    download_all_datasets(CONFIG)
-    print(" Fertig!")
+print("🎉 Fertig! Daten wurden aktualisiert.")
