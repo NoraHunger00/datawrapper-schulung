@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       # 👇 Debug-Schritt: Zeige alle Dateien an
-      - name: Debug: Liste alle Dateien auf
+      - name:  Liste alle Dateien auf
         run: |
           echo "Aktuelles Verzeichnis:"
           pwd
