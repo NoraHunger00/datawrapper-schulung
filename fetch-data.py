@@ -27,18 +27,19 @@ for attempt in range(3):
             continue
         response.raise_for_status()
 
-        new_content = response.content
+        # 👇 Daten in UTF-8 umwandeln
+        new_content = response.content.decode('latin-1').encode('utf-8')
         new_hash = hashlib.md5(new_content).hexdigest()
 
         # 3. Nur speichern, wenn sich die Daten geändert haben
         if current_hash and new_hash == current_hash:
             print("ℹ️ Daten haben sich nicht geändert. Überspringe Speichern und Upload.")
-            exit(0)  # Beende das Skript, wenn keine Änderungen vorliegen
+            exit(0)
 
         os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
         with open(OUTPUT_FILE, "wb") as f:
             f.write(new_content)
-        print(f"✅ Daten erfolgreich gespeichert: {OUTPUT_FILE}")
+        print(f"✅ Daten erfolgreich in UTF-8 gespeichert: {OUTPUT_FILE}")
         break
     except Exception as e:
         print(f"❌ Fehler beim Herunterladen (Versuch {attempt + 1}/3): {e}")

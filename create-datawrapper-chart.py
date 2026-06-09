@@ -7,17 +7,25 @@ if not api_key:
     print("❌ DATAWRAPPER_API_KEY nicht gesetzt!")
     exit()
 
-# 👇 Debug: API-Key prüfen (nur für Debugging!)
-print(f"🔑 API-Key (erster und letzter Buchstabe): {api_key[0]}{'*' * (len(api_key) - 2)}{api_key[-1]}")
-print(f"🔑 API-Key-Länge: {len(api_key)}")
-
 csv_file = os.getenv("CSV_FILE", "./data/hundebiss-statistik-2024.csv")
 chart_id = "v6uXs"  # Deine Chart-ID
 
-# 1. CSV laden
+# 1. CSV laden (mit Fallback für verschiedene Kodierungen)
 print(f"📥 Lade CSV aus {csv_file}...")
-with open(csv_file, "r", encoding="utf-8") as f:
-    csv_text = f.read()
+encoding_options = ['utf-8', 'latin-1', 'iso-8859-1', 'cp1252']
+csv_text = None
+for encoding in encoding_options:
+    try:
+        with open(csv_file, "r", encoding=encoding) as f:
+            csv_text = f.read()
+        print(f"✅ CSV erfolgreich mit Kodierung '{encoding}' geladen.")
+        break
+    except UnicodeDecodeError:
+        continue
+
+if not csv_text:
+    print("❌ Konnte CSV mit keiner Kodierung laden!")
+    exit()
 
 # 2. Daten zu Datawrapper hochladen
 print(f"📤 Lade Daten zu Chart {chart_id} hoch...")
