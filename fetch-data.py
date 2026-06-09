@@ -5,7 +5,7 @@ from typing import Dict
 
 CONFIG = {
     "datasets": {
-        "hundebiss-statistik-2024-v2.csv": "https://www.berlin.de/sen/verbraucherschutz/aufgaben/hundehaltung/hundebiss-statistik/hundebiss-statistik-2024/2025-08-14-biss-statistik-2024.csv",
+        "hundebiss-statistik-2024.csv": "https://www.berlin.de/sen/verbraucherschutz/aufgaben/hundehaltung/hundebiss-statistik/hundebiss-statistik-2024/2025-08-14-biss-statistik-2024.csv",
     },
     "output_dir": "./data",
     "create_dir": True,
@@ -15,13 +15,13 @@ CONFIG = {
 }
 
 def download_file(url: str, output_path: str, verbose: bool = True, delay: int = 10, max_retries: int = 3) -> bool:
-    """Lädt eine Datei mit Verzögerung, User-Agent und Retry-Logik herunter."""
+    """Lädt eine Datei herunter und überschreibt sie immer."""
     headers = {"User-Agent": "Mozilla/5.0 (compatible; GitHub Actions Bot/1.0)"}
     for attempt in range(max_retries):
         try:
             if verbose:
                 print(f"📥 Lade {os.path.basename(output_path)} von {url} (Versuch {attempt + 1}/{max_retries})...")
-            time.sleep(delay * (attempt + 1))  # Verzögerung erhöht sich pro Versuch
+            time.sleep(delay * (attempt + 1))
 
             response = requests.get(url, stream=True, headers=headers)
             if response.status_code == 429:
@@ -29,13 +29,14 @@ def download_file(url: str, output_path: str, verbose: bool = True, delay: int =
                 continue
             response.raise_for_status()
 
+            # 👇 Immer überschreiben (auch wenn die Datei existiert)
             os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
-            with open(output_path, "wb") as f:
+            with open(output_path, "wb") as f:  # "wb" überschreibt immer!
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
 
             if verbose:
-                print(f"✅ Erfolgreich heruntergeladen: {output_path}")
+                print(f"✅ Erfolgreich heruntergeladen und Überschrieben: {output_path}")
             return True
         except Exception as e:
             print(f"❌ Fehler beim Herunterladen von {url} (Versuch {attempt + 1}): {e}")
