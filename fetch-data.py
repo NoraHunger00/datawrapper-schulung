@@ -27,7 +27,7 @@ for attempt in range(3):
             continue
         response.raise_for_status()
 
-        # 👇 Daten in UTF-8 umwandeln
+        #Daten in UTF-8 umwandeln
         new_content = response.content.decode('latin-1').encode('utf-8')
         new_hash = hashlib.md5(new_content).hexdigest()
 

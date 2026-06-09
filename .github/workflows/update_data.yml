@@ -15,7 +15,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 👇 Debug-Schritt: Zeige alle Dateien an
+      # Debug-Schritt: Zeige alle Dateien an
       - name:  Liste alle Dateien auf
         run: |
           echo "Aktuelles Verzeichnis:"
