@@ -1,38 +1,43 @@
-name: Update Data
+name: Update Datawrapper Chart
+
+# Variable für den CSV-Dateinamen
+env:
+  CSV_FILE: "data/hundebiss-statistik-2024.csv"  # Hier kannst du den Pfad ändern
 
 on:
+  push:
+  workflow_dispatch:  # Manuelles Auslösen für Tests
   schedule:
-    - cron: "0 0 1 * *"
-  workflow_dispatch:  # Manuell auslösbar (z. B. für Tests)
+    - cron: '0 0 1 * *'  # Täglich um Mitternacht ausführen (optional)
 
 jobs:
-  update-data:
+  update-chart:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write  # Schreibrechte für das Repository
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: '3.9'
 
       - name: Install dependencies
-        run: pip install requests
-
-      - name: Run Python script
-        run: python fetch-data.py
-
-      - name: Commit and push changes
         run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
-          git add ./data/
-          git diff --quiet && git diff --staged --quiet || git commit -m "Automatische Aktualisierung der Daten $(date +'%Y-%m-%d')"
-          git push
+          python -m pip install --upgrade pip
+          pip install requests
+
+      # Daten  herunterladen (fetch-data.py)
+      - name: Fetch data
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OUTPUT_FILE: ${{ env.CSV_FILE }}
+        run: |
+          python fetch-data.py
+
+      # Daten zu Datawrapper hochladen (create_datawrapper_chart.py)
+      - name: Upload to Datawrapper
+        env:
+          DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+          CSV_FILE: ${{ env.CSV_FILE }}
+        run: |
+          python create_datawrapper_chart.py
