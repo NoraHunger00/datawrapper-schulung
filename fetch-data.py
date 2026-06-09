@@ -5,7 +5,7 @@ from typing import Dict
 
 CONFIG = {
     "datasets": {
-        "hundebiss-statistik-2024.csv": "https://www.berlin.de/sen/verbraucherschutz/aufgaben/hundehaltung/hundebiss-statistik/hundebiss-statistik-2024/2025-08-14-biss-statistik-2024.csv",
+        "hundebiss-statistik-2024-v2.csv": "https://www.berlin.de/sen/verbraucherschutz/aufgaben/hundehaltung/hundebiss-statistik/hundebiss-statistik-2024/2025-08-14-biss-statistik-2024.csv",
     },
     "output_dir": "./data",
     "create_dir": True,
