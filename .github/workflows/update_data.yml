@@ -1,18 +1,16 @@
 name: Update Datawrapper Chart
 
-# Variable für den CSV-Dateinamen
-env:
-  CSV_FILE: "data/hundebiss-statistik-2024.csv"  # Hier kannst du den Pfad ändern
-
 on:
   push:
-  workflow_dispatch:  # Manuelles Auslösen für Tests
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 1 * *'  # Täglich um Mitternacht ausführen (optional)
+    - cron: '0 0 1 * *'
 
 jobs:
   update-chart:
     runs-on: ubuntu-latest
+    env:
+      CSV_FILE: "data/hundebiss-statistik-2024.csv"
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -23,21 +21,15 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests
+        run: pip install requests
 
-      # Daten  herunterladen (fetch-data.py)
-      - name: Fetch data
+      - name: Fetch data from Berlin.de
         env:
           OUTPUT_FILE: ${{ env.CSV_FILE }}
-        run: |
-          python fetch-data.py
+        run: python ./fetch-data.py  # 👈 ./ hinzufügen
 
-      # Daten zu Datawrapper hochladen (create_datawrapper_chart.py)
       - name: Upload to Datawrapper
         env:
           DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
           CSV_FILE: ${{ env.CSV_FILE }}
-        run: |
-          python create_datawrapper_chart.py
+        run: python ./create_datawrapper_chart.py  # 👈 ./ hinzufügen
