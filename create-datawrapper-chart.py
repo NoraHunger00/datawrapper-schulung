@@ -7,8 +7,12 @@ if not api_key:
     print("❌ DATAWRAPPER_API_KEY nicht gesetzt!")
     exit()
 
+# 👇 Debug: API-Key prüfen (nur für Debugging!)
+print(f"🔑 API-Key (erster und letzter Buchstabe): {api_key[0]}{'*' * (len(api_key) - 2)}{api_key[-1]}")
+print(f"🔑 API-Key-Länge: {len(api_key)}")
+
 csv_file = os.getenv("CSV_FILE", "./data/hundebiss-statistik-2024.csv")
-chart_id = "v6uXs"  # 👈 Hier deine Chart-ID eintragen!
+chart_id = "v6uXs"  # Deine Chart-ID
 
 # 1. CSV laden
 print(f"📥 Lade CSV aus {csv_file}...")
