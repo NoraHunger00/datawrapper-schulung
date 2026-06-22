@@ -2,11 +2,7 @@ Hunderassen;Zuordnung;Faelle in denen Menschen schwer verletzt wurden;Faelle in 
 Pit Bull Terrier;Gefährliche Hunde (Rasseliste);2;2;;10
 American Staffordshire Terrier;Gefährliche Hunde (Rasseliste);4;10;3;11
 Bull Terrier;Gefährliche Hunde (Rasseliste);2;1;1;3
-;Mischlinge gefährliche Hunde, ohne Rassezuordnung;1;6;2;6
 American Bully;Mischlinge gefährliche Hunde, mit Rassezuordnung;1;;1;2
-;"Mischlinge - ohne Rassezuordnung
-(ausgenommen Mischlinge „Gefährlicher Hund“)";17;142;20;69
-;nicht bestimmte bzw. nicht bestimmbare Hunde (-Rassen);14;28;11;41
 Airedale Terrier;Sonstige Rassen;;;;1
 Akita;Sonstige Rassen;;2;;7
 Alano Espanol;Sonstige Rassen;;;;
@@ -181,5 +177,3 @@ Xoloitzcuintle (Mexikanischer Nackthund);Sonstige Rassen;;;;
 Yorkshire Terrier;Sonstige Rassen;;9;1;2
 Zwergschnauzer;Sonstige Rassen;;1;;
 Zwergspitz (Pomeranian);Sonstige Rassen;;1;;
-;SUMME Hunde ohne Gefährliche Hunde;67;427;90;325
-;SUMME Hundebissvorfälle insgesamt (inklusive Gefährliche Hunde);77;446;97;357
